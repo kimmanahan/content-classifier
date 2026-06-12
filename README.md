@@ -131,6 +131,60 @@ const result = classify(text, {
 
 ---
 
+## Using with Claude API
+
+The classifier is designed to prep content for LLM analysis — token budgeting keeps payloads within context limits before you send to Claude.
+
+```js
+const Anthropic = require('@anthropic-ai/sdk');
+const { classify, extractArticleText } = require('./content-classifier');
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+async function analyzeContent(rawText) {
+  const result = classify(rawText, { topicLimit: 5 });
+
+  const message = await client.messages.create({
+    model: 'claude-opus-4-7',
+    max_tokens: 512,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: `Classify the following content and return a JSON object with keys: category, sentiment, summary (one sentence).\n\n${result.topics.map(t => t.term).join(', ')}\n\n${rawText.slice(0, result.estimatedTokens * 4)}`
+          }
+        ]
+      }
+    ]
+  });
+
+  return {
+    ...result,
+    claude: JSON.parse(message.content[0].text)
+  };
+}
+```
+
+**In the browser** (via your own backend proxy — never expose your API key client-side):
+
+```js
+const text = ContentClassifier.extractArticleText('article, main', document);
+const prepped = ContentClassifier.capText(text);
+
+// Send prepped.text to your backend, which calls Claude
+fetch('/api/classify', {
+  method: 'POST',
+  body: JSON.stringify({ text: prepped.text, truncated: prepped.truncated }),
+  headers: { 'Content-Type': 'application/json' }
+});
+```
+
+> **Note:** Your Claude API key (`ANTHROPIC_API_KEY`) must only be used server-side. Get yours at [console.anthropic.com](https://console.anthropic.com).
+
+---
+
 ## Design notes
 
 - **ES5** — runs in any browser, no transpilation needed
