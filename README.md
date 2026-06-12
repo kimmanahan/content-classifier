@@ -25,7 +25,7 @@ Works in the browser (UMD global) and Node.js (`require`).
 <script>
   var result = ContentClassifier.classify(document.body.innerText);
   console.log(result.topics);
-  // [{ term: 'custody', count: 14 }, { term: 'divorce', count: 11 }, ...]
+  // [{ term: 'javascript', count: 18 }, { term: 'framework', count: 11 }, ...]
 </script>
 ```
 
@@ -40,10 +40,10 @@ console.log(result);
 //   charCount: 4901,
 //   estimatedTokens: 1225,
 //   truncated: 0,
-//   topics: [ { term: 'custody', count: 14 }, ... ]
+//   topics: [ { term: 'javascript', count: 18 }, ... ]
 // }
 
-console.log(classifyPageType('/article/how-to-file-for-divorce'));
+console.log(classifyPageType('/article/intro-to-machine-learning'));
 // 'article'
 ```
 
@@ -73,7 +73,7 @@ extractTopics(text, {
   limit:      5,                         // top N results
   minLength:  3                          // min token length
 })
-// → [{ term: 'custody', count: 14 }, ...]
+// → [{ term: 'javascript', count: 18 }, ...]
 ```
 
 ### `extractArticleText(selectorList, doc?)`
@@ -87,10 +87,10 @@ extractArticleText('article, #main-content, main', document)
 ### `classifyPageType(pathname, customMap?)`
 
 ```js
-classifyPageType('/news/2024-ruling', {
-  '/news':          'news_article',
-  '/state-guide':   'state_guide',
-  '/child-support': 'calculator'
+classifyPageType('/blog/intro-to-react', {
+  '/blog':     'blog_post',
+  '/docs':     'documentation',
+  '/products': 'product_page'
 })
 // → 'news_article'
 ```
@@ -124,7 +124,7 @@ Extend the stopword list:
 ```js
 const result = classify(text, {
   stopwords: Object.assign({}, ContentClassifier.DEFAULT_STOPWORDS, {
-    lawyer: 1, attorney: 1, legal: 1
+    click: 1, subscribe: 1, button: 1
   })
 });
 ```
